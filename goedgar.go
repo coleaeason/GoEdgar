@@ -20,12 +20,6 @@ func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "Example usages:\n")
-		fmt.Fprintf(os.Stderr, "  Generate a default, valid token:\n")
-		fmt.Fprintf(os.Stderr, "    jwtgen\n")
-		fmt.Fprintf(os.Stderr, "  Generate a default, valid token, and pretty-print debug information:\n")
-		fmt.Fprintf(os.Stderr, "    jwtgen --debug -pp\n")
-		fmt.Fprintf(os.Stderr, "  Generate an expired token for cole@test.com:\n")
-		fmt.Fprintf(os.Stderr, "    jwtgen --expired --email=cole@test.com\n")
 		fmt.Fprintf(os.Stderr, "\nOptions: \n")
 
 		flag.PrintDefaults()
