@@ -6,6 +6,23 @@ import (
 	"time"
 )
 
+type Date string
+
+func (d *Date) UnmarshalJSON(bytes []byte) error {
+
+	if string(bytes) == `""` {
+		return nil
+	}
+
+	dd, err := time.Parse(`"2006-01-02"`, string(bytes))
+	if err != nil {
+		return err
+	}
+	*d = Date(dd.Format("2006-01-02"))
+
+	return nil
+}
+
 var holidays = []time.Time{
 	// New Years Day
 	// Jan 1st

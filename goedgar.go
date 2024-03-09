@@ -1,17 +1,22 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
+	"log"
 	"os"
 
-	"github.com/coleaeason/goedgar/dates"
+	"github.com/coleaeason/goedgar/fetcher"
+	"github.com/coleaeason/goedgar/filings"
 )
 
 // Globals
 var (
 	// CLI Flags
 	flagDate  = flag.String("date", "2023-11-01", "Date to check")
+	flagCIK   = flag.String("cik", "", "CIK to process")
 	flagDebug = flag.Bool("debug", false, "Print some debug information")
 )
 
@@ -28,10 +33,37 @@ func main() {
 	// First things first, parse our CLI flags.
 	flag.Parse()
 
-	result, err := dates.IsSECHoliday(*flagDate)
+	r := fetcher.GetPage(fmt.Sprintf("https://data.sec.gov/submissions/CIK%s.json", *flagCIK))
+	b, _ := io.ReadAll(r)
+
+	var response filings.CIKFilingJson
+	err := json.Unmarshal(b, &response)
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
+		log.Fatal("JSON Unmarshal failed ", err)
 	}
-	fmt.Println(*flagDate, "is a holiday?", result)
+
+	// dates.IsSECHoliday(*flagDate)
+	var forms []filings.Filing
+	recents := response.Filings.Recent
+	for i, _ := range recents.FilingDate {
+		var form filings.Filing
+		form.AcceptanceDateTime = recents.AcceptanceDateTime[i]
+		form.AccessionNumber = recents.AccessionNumber[i]
+		form.Act = recents.Act[i]
+		form.FileNumber = recents.FileNumber[i]
+		form.FilingDate = recents.FilingDate[i]
+		form.FilmNumber = recents.FilmNumber[i]
+		form.Form = recents.Form[i]
+		form.IsInlineXBRL = recents.IsInlineXBRL[i]
+		form.IsXBRL = recents.IsXBRL[i]
+		form.Items = recents.Items[i]
+		form.PrimaryDocDescription = recents.PrimaryDocDescription[i]
+		form.PrimaryDocument = recents.PrimaryDocDescription[i]
+		form.ReportDate = recents.ReportDate[i]
+		form.Size = recents.Size[i]
+		forms = append(forms, form)
+	}
+	for i, _ := range forms {
+		fmt.Println(forms[i])
+	}
 }
